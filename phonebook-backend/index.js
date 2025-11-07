@@ -2,29 +2,28 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 const morgan = require('morgan')
-const fs = require('fs')
-
-// Load data from db.json
-const loadData = () => {
-    try {
-        const data = fs.readFileSync('./db.json', 'utf8')
-        return JSON.parse(data).persons
-    } catch (error) {
-        console.error('Error reading db.json:', error)
-        return []
-    }
-}
-
-// Save data to db.json
-const saveData = (persons) => {
-    try {
-        fs.writeFileSync('./db.json', JSON.stringify({ persons }, null, 2))
-    } catch (error) {
-        console.error('Error writing to db.json:', error)
-    }
-}
-
-let persons = loadData()
+let persons = [
+        { 
+            "id": "1",
+            "name": "Arto Hellas", 
+            "number": "040-123456"
+        },
+        { 
+            "id": "2",
+            "name": "Ada Lovelace", 
+            "number": "39-44-5323523"
+        },
+        { 
+            "id": "3",
+            "name": "Dan Abramov", 
+            "number": "12-43-234345"
+        },
+        { 
+            "id": "4",
+            "name": "Mary Poppendieck", 
+            "number": "39-23-6423122"
+        }
+]
 
 app.use(cors())
 app.use(morgan('dev'))
@@ -53,7 +52,6 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     persons = persons.filter(person => person.id !== request.params.id)
-    saveData(persons)
     response.status(204).end()
 })
 
@@ -90,37 +88,35 @@ app.post('/api/persons/', (request, response) => {
         number: body.number
     }
     persons = persons.concat(person)
-    saveData(persons)
     response.json(person)
 })
 
-app.put('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    const body = request.body
+    app.put('/api/persons/:id', (request, response) => {
+        const id = request.params.id
+        const body = request.body
 
-    if (!body.name || !body.number) {
-        return response.status(400).json({
-            error: 'name or number missing'
-        })
-    }
+        if (!body.name || !body.number) {
+            return response.status(400).json({
+                error: 'name or number missing'
+            })
+        }
 
-    const personIndex = persons.findIndex(person => person.id === id)
-    if (personIndex === -1) {
-        return response.status(404).json({
-            error: 'person not found'
-        })
-    }
+        const personIndex = persons.findIndex(person => person.id === id)
+        if (personIndex === -1) {
+            return response.status(404).json({
+                error: 'person not found'
+            })
+        }
 
-    const updatedPerson = {
-        ...persons[personIndex],
-        name: body.name,
-        number: body.number
-    }
+        const updatedPerson = {
+            ...persons[personIndex],
+            name: body.name,
+            number: body.number
+        }
 
-    persons = persons.map(person => person.id === id ? updatedPerson : person)
-    saveData(persons)
-    response.json(updatedPerson)
-})
+        persons[personIndex] = updatedPerson
+        response.json(updatedPerson)
+    })
 
 
 const PORT =  process.env.PORT || 3001
