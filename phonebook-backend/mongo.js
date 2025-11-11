@@ -16,7 +16,6 @@ const Person = mongoose.model('Person', personSchema)
 
 
 const password = process.argv[2]
-//6uU2Qni1CbGtPGT3
 
 const url = `mongodb+srv://fullstack:${password}@cluster0.2g5lns7.mongodb.net/personsApp?appName=Cluster0`
 mongoose.connect(url)

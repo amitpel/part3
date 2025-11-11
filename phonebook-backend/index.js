@@ -1,29 +1,31 @@
+require('dotenv').config()
 const express = require('express')
+const Person = require('./models/person')
+const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
-const morgan = require('morgan')
-let persons = [
-        { 
-            "id": "1",
-            "name": "Arto Hellas", 
-            "number": "040-123456"
-        },
-        { 
-            "id": "2",
-            "name": "Ada Lovelace", 
-            "number": "39-44-5323523"
-        },
-        { 
-            "id": "3",
-            "name": "Dan Abramov", 
-            "number": "12-43-234345"
-        },
-        { 
-            "id": "4",
-            "name": "Mary Poppendieck", 
-            "number": "39-23-6423122"
-        }
-]
+// let persons = [
+//         { 
+//             "id": "1",
+//             "name": "Arto Hellas", 
+//             "number": "040-123456"
+//         },
+//         { 
+//             "id": "2",
+//             "name": "Ada Lovelace", 
+//             "number": "39-44-5323523"
+//         },
+//         { 
+//             "id": "3",
+//             "name": "Dan Abramov", 
+//             "number": "12-43-234345"
+//         },
+//         { 
+//             "id": "4",
+//             "name": "Mary Poppendieck", 
+//             "number": "39-23-6423122"
+//         }
+// ]
 
 app.use(cors())
 app.use(morgan('dev'))
@@ -40,20 +42,23 @@ app.get('/info', (request, response) => {
 
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const person = persons.find(person => person.id === request.params.id)
-    if (person)
+    Person.findById(request.params.id).then(person => {
         response.json(person)
-    else
-        response.status(404).end()
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    persons = persons.filter(person => person.id !== request.params.id)
-    response.status(204).end()
+    Person.findByIdAndDelete(request.params.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 const generateID = () => {
@@ -78,18 +83,14 @@ app.post('/api/persons/', (request, response) => {
             error: 'number missing'
     })
 
-    if(persons.filter(person => person.name === body.name).length > 0)
-        return response.status(400).json({
-            error: "name must be unique"
-    })
-
-    const person = {
-        id: generateID(),
+    const person = new Person({
         name: body.name,
         number: body.number
-    }
-    persons = persons.concat(person)
-    response.json(person)
+    })
+
+    person.save().then(savedPerson => {
+        response.json(savedPerson   )
+    })
 })
 
     app.put('/api/persons/:id', (request, response) => {
