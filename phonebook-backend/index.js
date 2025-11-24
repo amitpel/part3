@@ -10,7 +10,7 @@ const app = express()
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
-app.use(express.static('dist'))
+//app.use(express.static('dist'))
 
 app.get('/info', (request, response, next) => {
   Person.countDocuments({})
@@ -66,16 +66,16 @@ app.post('/api/persons', (req, res, next) => {
 
 app.put('/api/persons/:id', (req, res, next) => {
   const { name, number } = req.body
-  if (!name || !number) return res.status(400).json({ error: 'name or number missing' })
 
   Person.findByIdAndUpdate(
     req.params.id,
     { name, number },
-    { new: true, runValidators: true, context: 'query' }
+    { new: true, context: 'query' }
   )
     .then(updated => updated ? res.json(updated) : res.status(404).json({ error: 'person not found' }))
     .catch(next)
 })
+
 
 
 const unknownEndpoint = (request, response) => {
