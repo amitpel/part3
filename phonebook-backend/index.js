@@ -6,11 +6,18 @@ const cors = require('cors')
 const Person = require('./models/person')
 const app = express()
 
+let RateLimit = require('express-rate-limit');
+let limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
 
+app.set('trust proxy', 1)
 app.use(cors())
 app.use(morgan('dev'))
+app.use(limiter)
 app.use(express.json())
-//app.use(express.static('dist'))
+app.use(express.static('dist'))
 
 app.get('/info', (request, response, next) => {
   Person.countDocuments({})
@@ -69,7 +76,7 @@ app.put('/api/persons/:id', (req, res, next) => {
 
   Person.findByIdAndUpdate(
     req.params.id,
-    { name, number },
+    { $set: { name, number } },
     { new: true, context: 'query' }
   )
     .then(updated => updated ? res.json(updated) : res.status(404).json({ error: 'person not found' }))
