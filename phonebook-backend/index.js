@@ -29,26 +29,26 @@ app.get('/api/persons', (request, response, next) => {
   Person.find({}).then(persons => {
     response.json(persons)
   })
-  .catch(next)
+    .catch(next)
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
-    Person.findById(request.params.id)
+  Person.findById(request.params.id)
     .then(person => {
-        if (person)
-            response.json(person)
-        else
-            response.status(404).end()
+      if (person)
+        response.json(person)
+      else
+        response.status(404).end()
     })
     .catch(next)
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-    Person.findByIdAndDelete(request.params.id)
-        .then(result => {
-            response.status(204).end()
-        })
-        .catch(next)
+  Person.findByIdAndDelete(request.params.id)
+    .then(() => {
+      response.status(204).end()
+    })
+    .catch(next)
 })
 
 
@@ -81,6 +81,8 @@ app.put('/api/persons/:id', (req, res, next) => {
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
+
+// eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
   if (err.name === 'CastError') return res.status(400).json({ error: 'malformatted id' })
   if (err.name === 'ValidationError') return res.status(400).json({ error: err.message })
